@@ -5,15 +5,16 @@ import java.util.ArrayList;
 import java.util.regex.*;
 import javax.swing.table.DefaultTableModel;
 
-
 public class UpdateDialog extends JDialog {
     private JTextField nameField, phoneNoField, addressField, emailField, dobField;
     private JButton updateButton, cancelButton;
     private ArrayList<String> rowData;
     private DefaultTableModel model;
     private int selectedRow;
+    private ArrayList<ArrayList<String>> data;
+    
 
-    UpdateDialog(JFrame parent, ArrayList<String> rowData, DefaultTableModel model, int selectedRow) {
+    public UpdateDialog(JFrame parent, ArrayList<String> rowData, DefaultTableModel model, int selectedRow, ArrayList<ArrayList<String>> data) {
         super(parent, "Update Contact", true);
         setSize(400, 300);
         setLocationRelativeTo(parent);
@@ -21,6 +22,8 @@ public class UpdateDialog extends JDialog {
         this.rowData = rowData;
         this.model = model;
         this.selectedRow = selectedRow;
+        this.data = data;
+
 
         JPanel updatePanel = new JPanel(new GridLayout(0, 2, 5, 5));
 
@@ -66,34 +69,31 @@ public class UpdateDialog extends JDialog {
 
         setLayout(new BorderLayout());
         add(updatePanel, BorderLayout.CENTER);
+
     }
 
-    private boolean validateAndUpdateContact() {
+    public boolean validateAndUpdateContact() {
         String name = nameField.getText();
         String phoneNo = phoneNoField.getText();
         String address = addressField.getText();
         String email = emailField.getText();
         String dob = dobField.getText();
 
-        // Perform validation for each field
         if (name.isEmpty() || phoneNo.isEmpty() || address.isEmpty() || email.isEmpty() || dob.isEmpty()) {
             JOptionPane.showMessageDialog(this, "All fields must be filled.", "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
 
-        // Validate the email using a regular expression
         if (!isValidEmail(email)) {
             JOptionPane.showMessageDialog(this, "Invalid email format.", "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
 
-        // Validate the date of birth using a regular expression (adjust the pattern as needed)
-        if (!isValidDOB(dob)) {
+        if (!RegexValidator.isDobValid(dob)) {
             JOptionPane.showMessageDialog(this, "Invalid date of birth format.", "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
 
-        // Update the contact data if all validations pass
         rowData.set(0, name);
         rowData.set(1, phoneNo);
         rowData.set(2, address);
@@ -106,28 +106,14 @@ public class UpdateDialog extends JDialog {
         model.setValueAt(email, selectedRow, 3);
         model.setValueAt(dob, selectedRow, 4);
 
-        // Save data to XML here if needed
+        XmlDataSaver.saveDataToXml(data);
 
         return true;
     }
 
-    // Regular expression pattern for a valid email address
-    private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@(.+)$";
-
-    // Regular expression pattern for a valid date of birth (YYYY-MM-DD)
-    private static final String DOB_REGEX = "^\\d{4}-\\d{2}-\\d{2}$";
-
-    // Check if the email is valid based on the regular expression
     private boolean isValidEmail(String email) {
-        Pattern pattern = Pattern.compile(EMAIL_REGEX);
+        Pattern pattern = Pattern.compile(RegexValidator.EMAIL_PATTERN);
         Matcher matcher = pattern.matcher(email);
-        return matcher.matches();
-    }
-
-    // Check if the date of birth is valid based on the regular expression
-    private boolean isValidDOB(String dob) {
-        Pattern pattern = Pattern.compile(DOB_REGEX);
-        Matcher matcher = pattern.matcher(dob);
         return matcher.matches();
     }
 }

@@ -23,6 +23,8 @@ public class Ui extends JFrame implements ActionListener {
     JButton submit, searchButton, updateButton, deleteButton;
 
     int selectedRowIndex;
+    XmlDataSaver xmlDataSaver = new XmlDataSaver();
+
 
     Ui() {
         super("Contact Details");
@@ -116,7 +118,7 @@ public class Ui extends JFrame implements ActionListener {
         tabbedPane.addTab("All Contacts", allContactsPanel);
 
         add(tabbedPane);
-        loadDataFromXml();
+        DataXmlLoader.loadDataFromXml(data, model);;
         setVisible(true);
     }
 
@@ -125,144 +127,35 @@ public class Ui extends JFrame implements ActionListener {
             dataSubmit();
         } else if (ae.getActionCommand().equals("Search")) {
             String searchText = searchField.getText();
-            searchContacts(searchText);
+            ContactSearch.searchContacts(data, table, searchText);
         } else if (ae.getActionCommand().equals("Update")) {
             updateData();
         } else if (ae.getActionCommand().equals("Delete")) {
-            deleteData();
+            ContactDeleter.deleteData(table, data);
         }
     }
 
-    private void searchContacts(String searchText) {
-        DefaultTableModel model = (DefaultTableModel) table.getModel();
-        model.setRowCount(0); // Clear the table
-
-        boolean contactFound = false; // Flag to check if any contact matches the search text
-
-        for (ArrayList<String> rowData : data) {
-            String name = rowData.get(0);
-            if (name.equalsIgnoreCase(searchText)) { // Use equalsIgnoreCase for an exact case-insensitive match
-                model.addRow(rowData.toArray());
-                contactFound = true; // Set the flag to true when a contact is found
-            }
-        }
-
-        if (!contactFound) {
-            JOptionPane.showMessageDialog(this, "No contact found with the given name.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void deleteData() {
-        int[] selectedRows = table.getSelectedRows();
-        int numRowsToDelete = selectedRows.length;
-        if (numRowsToDelete > 0) {
-            int confirm = JOptionPane.showConfirmDialog(this,
-                    "Are you sure you want to delete the selected contact(s)?", "Confirmation", JOptionPane.YES_NO_OPTION);
-            if (confirm == JOptionPane.YES_OPTION) {
-                for (int i = numRowsToDelete - 1; i >= 0; i--) {
-                    int selectedRowIndex = selectedRows[i];
-                    data.remove(selectedRowIndex);
-                    model.removeRow(selectedRowIndex);
-                }
-
-                saveDataToXml();
-                JOptionPane.showMessageDialog(this, "Contact(s) deleted successfully!", "Success",
-                        JOptionPane.INFORMATION_MESSAGE);
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "Please select one or more contacts to delete.", "ERROR",
-                    JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
+    
+   
     private void dataSubmit() {
-        // Retrieve the values entered in the form
         String name = txtFieldName.getText();
         String phoneNo = txtFieldPhoneNo.getText();
         String address = txtFieldAddress.getText();
         String email = txtFieldEmail_ID.getText();
         String dob = txtFieldDob.getText();
-        String gender = maleRadioButton.isSelected() ? "Male" : "Female";
+        boolean isMale = maleRadioButton.isSelected();
 
-        // Validate the data (you may want to add more validation)
-        if (isNameValid(name) && isPhoneNumberValid(phoneNo) && isEmailValid(email) && isDobValid(dob)) {
-            // Create a new row of data
-            ArrayList<String> rowData = new ArrayList<String>();
-            rowData.add(name);
-            rowData.add(phoneNo);
-            rowData.add(address);
-            rowData.add(email);
-            rowData.add(dob);
-            rowData.add(gender);
+        boolean dataSubmitted = DataSubmitter.submitData(data, model, name, phoneNo, address, email, dob, isMale);
 
-            // Add the row to the data list and table
-            data.add(rowData);
-            model.addRow(rowData.toArray());
-
-            // Save the data to XML
-            saveDataToXml();
-
-            // Clear the form
+        if (dataSubmitted) {
+            // Data submitted successfully
+            xmlDataSaver.saveDataToXml(data);
             clearForm();
-
-            // Show a success message
             showDataSubmittedDialog();
-        } else {
-            JOptionPane.showMessageDialog(this, "Please enter valid data in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void saveDataToXml() {
-        try {
-            File file = new File("contact_data.xml");
-            if (!file.exists()) {
-                file.createNewFile();
-            }
 
-            FileWriter writer = new FileWriter(file);
-            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-            writer.write("<contact_list>\n");
-
-            for (ArrayList<String> rowData : data) {
-                writer.write("\t<contact>\n");
-                writer.write("\t\t<name>" + rowData.get(0) + "</name>\n");
-                writer.write("\t\t<phone>" + rowData.get(1) + "</phone>\n");
-                writer.write("\t\t<address>" + rowData.get(2) + "</address>\n");
-                writer.write("\t\t<email>" + rowData.get(3) + "</email>\n");
-                writer.write("\t\t<dob>" + rowData.get(4) + "</dob>\n");
-                writer.write("\t\t<gender>" + rowData.get(5) + "</gender>\n");
-                writer.write("\t</contact>\n");
-            }
-
-            writer.write("</contact_list>");
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private boolean isNameValid(String name) {
-        // Regex for a full name (alphabets with spaces)
-        String regex = "^[A-Za-z\\s]+$";
-        return name.matches(regex);
-    }
-
-    private boolean isPhoneNumberValid(String phoneNumber) {
-        // Regex for a valid phone number (10 digits)
-        String regex = "^[0-9]{10}$";
-        return phoneNumber.matches(regex);
-    }
-
-    private boolean isEmailValid(String email) {
-        // Regex for a valid email address
-        String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
-        return email.matches(regex);
-    }
-
-    private boolean isDobValid(String dob) {
-        // Regex for a valid date of birth (dd/mm/yyyy format)
-        String regex = "^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/(19|20)\\d{2}$";
-        return dob.matches(regex);
-    }
 
     private void updateData() {
         int[] selectedRows = table.getSelectedRows();
@@ -275,22 +168,20 @@ public class Ui extends JFrame implements ActionListener {
         int selectedRow = selectedRows[0];
         ArrayList<String> rowData = data.get(selectedRow);
 
-        // Corrected constructor call for UpdateDialog
-        UpdateDialog updateDialog = new UpdateDialog(this, rowData, model, selectedRowIndex);
+      
+        UpdateDialog updateDialog = new UpdateDialog(this, rowData,model, selectedRowIndex,data);
 
         updateDialog.setVisible(true);
 
-        // After the dialog is closed, you can save the data to XML
-        saveDataToXml();
+        xmlDataSaver.saveDataToXml(data);
+
     }
-    private boolean isFieldValid(String fieldData) {
-        return !fieldData.isEmpty();
-    }
+  
 
     public void addContactData(ArrayList<String> rowData) {
         data.add(rowData);
         model.addRow(rowData.toArray());
-        saveDataToXml();
+        xmlDataSaver.saveDataToXml(data);
         clearForm();
     }
 
@@ -308,54 +199,7 @@ public class Ui extends JFrame implements ActionListener {
         JOptionPane.showMessageDialog(this, "Data submitted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private void loadDataFromXml() {
-        try {
-            File file = new File("contact_data.xml");
-            if (!file.exists()) {
-                return;
-            }
-
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            String line;
-            String xmlContent = "";
-
-            while ((line = reader.readLine()) != null) {
-                xmlContent += line;
-            }
-
-            reader.close();
-
-            String xml = xmlContent;
-
-            Pattern pattern = Pattern.compile("<contact>.*?</contact>");
-            Matcher matcher = pattern.matcher(xml);
-
-            while (matcher.find()) {
-                String contactXml = matcher.group();
-                String name = extractElementValue(contactXml, "name");
-                String phoneNo = extractElementValue(contactXml, "phone");
-                String address = extractElementValue(contactXml, "address");
-                String email = extractElementValue(contactXml, "email");
-                String dob = extractElementValue(contactXml, "dob");
-                String gender = extractElementValue(contactXml, "gender");
-
-                ArrayList<String> rowData = new ArrayList<String>();
-                rowData.add(name);
-                rowData.add(phoneNo);
-                rowData.add(address);
-                rowData.add(email);
-                rowData.add(dob);
-                rowData.add(gender);
-
-                data.add(rowData);
-                model.addRow(rowData.toArray());
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
+  
     private String extractElementValue(String xml, String elementName) {
         Pattern pattern = Pattern.compile("<" + elementName + ">(.*?)</" + elementName + ">");
         Matcher matcher = pattern.matcher(xml);

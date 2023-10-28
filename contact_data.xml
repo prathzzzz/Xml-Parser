@@ -1,11 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <contact_list>
 	<contact>
-		<name>dishaaaaaaaaaaaa</name>
+		<name>no</name>
 		<phone>9022297213</phone>
 		<address>ddwd</address>
 		<email>disha@gmail.com</email>
-		<dob>2003-17-04</dob>
+		<dob>31/08/2003</dob>
+		<gender>Female</gender>
+	</contact>
+	<contact>
+		<name>ssssssssss</name>
+		<phone>9022297213</phone>
+		<address>sq</address>
+		<email>dd@gmail.com</email>
+		<dob>31/08/2003</dob>
+		<gender>Male</gender>
+	</contact>
+	<contact>
+		<name>Dude</name>
+		<phone>9022928972</phone>
+		<address>saqds</address>
+		<email>dwd@gmail.com</email>
+		<dob>31/08/2003</dob>
+		<gender>Male</gender>
+	</contact>
+	<contact>
+		<name>aNu</name>
+		<phone>9022298213</phone>
+		<address>add</address>
+		<email>hello@gmail.com</email>
+		<dob>2003-31-08</dob>
 		<gender>Female</gender>
 	</contact>
 </contact_list>
