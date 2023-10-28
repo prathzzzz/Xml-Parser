@@ -19,7 +19,7 @@ public class ContactDeleter {
                     model.removeRow(selectedRowIndex);
                 }
 
-                Ui.saveDataToXml(data); // Call saveDataToXml from the Ui class with the data parameter
+                XmlDataSaver.saveDataToXml(data); // Call saveDataToXml from the Ui class with the data parameter
 
                 JOptionPane.showMessageDialog(null, "Contact(s) deleted successfully!", "Success",
                         JOptionPane.INFORMATION_MESSAGE);
