@@ -174,7 +174,7 @@ public class Ui extends JFrame implements ActionListener {
         boolean dataSubmitted = DataSubmitter.submitData(data, model, name, phoneNo, address, email, dob, isMale);
 
         if (dataSubmitted) {
-            xmlDataSaver.saveDataToXml(data);
+            XmlDataSaver.saveDataToXml(data);
             clearForm();
             showDataSubmittedDialog();
         }
@@ -194,7 +194,7 @@ public class Ui extends JFrame implements ActionListener {
         UpdateDialog updateDialog = new UpdateDialog(this, rowData, model, selectedRowIndex, data);
         updateDialog.setVisible(true);
 
-        xmlDataSaver.saveDataToXml(data);
+        XmlDataSaver.saveDataToXml(data);
     }
 
     private void searchContacts() {

@@ -1,7 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.regex.*;
-import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 public class DataXmlLoader {
