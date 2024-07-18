@@ -19,7 +19,6 @@ public class Ui extends JFrame implements ActionListener {
     private JButton submit, searchButton, updateButton, deleteButton, refreshButton;
 
     private int selectedRowIndex;
-    private XmlDataSaver xmlDataSaver;
 
     public Ui() {
         super("Contact Details");
