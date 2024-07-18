@@ -19,7 +19,6 @@ public class Ui extends JFrame implements ActionListener {
     private JButton submit, searchButton, updateButton, deleteButton, refreshButton;
 
     private int selectedRowIndex;
-
     public Ui() {
         super("Contact Details");
         initializeComponents();
@@ -68,7 +67,7 @@ public class Ui extends JFrame implements ActionListener {
         deleteButton = new JButton("Delete");
         refreshButton = new JButton("Refresh");
 
-        xmlDataSaver = new XmlDataSaver();
+        new XmlDataSaver();
     }
 
     private void layoutComponents() {
